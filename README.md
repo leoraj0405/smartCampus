@@ -6,3 +6,5 @@ this project build by
 nodejs express for backend 
 reactjs with mantine for frontend development  
 mysql for database management 
+
+for run this application node version is 18.20.0
