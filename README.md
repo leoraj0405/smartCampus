@@ -8,3 +8,9 @@ reactjs with mantine for frontend development
 mysql for database management 
 
 for run this application node version is 18.20.0
+
+procedure to run the server
+
+    to run the application server 
+    go to that server folder using "cd server" 
+    run the command "npm run dev"

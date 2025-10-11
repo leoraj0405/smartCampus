@@ -1,19 +1,16 @@
-import express, { Request, Response } from 'express';
-// import userRoutes from './routes/user';
+import express from 'express';
+import adminController from  './admin/admin.controller'
+import dotenv from 'dotenv';
+import bodyParser from 'body-parser'
+dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.SERVER_PORT || 3200;
 
-// Middleware to parse JSON
 app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Routes
-// app.use('/users', userRoutes);
-
-// Test route
-app.get('/', (req: Request, res: Response) => {
-  res.send('Express + TypeScript server running!');
-});
+app.use('/api/admin/', adminController)
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
