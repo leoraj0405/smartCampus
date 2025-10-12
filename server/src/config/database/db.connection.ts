@@ -11,7 +11,7 @@ const db = mysql.createPool({
 });
 
 db.on('connection', (connection: any) => {
-    console.log('New DB connection established with threadId:', connection.threadId);
+    console.log('New DB connection established.');
 });
 
 export const execQuery = (query: string, queryInput?: any) => {

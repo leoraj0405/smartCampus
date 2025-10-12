@@ -2,13 +2,14 @@ import { Request, Response } from 'express';
 import { execQuery } from '../config/database/db.connection'
 import HashService from '../utils/password.hash';
 import crypto from 'crypto';
-import { SignJWT } from 'jose';
 import dotenv from 'dotenv';
-import { generateUniqueRandomString, pemToArrayBuffer } from '../utils/commonFunctions';
+import * as jwt from 'jsonwebtoken';
+import { generateUniqueRandomString } from '../utils/commonFunctions';
 dotenv.config();
 
 
 const hashService = new HashService()
+const JWT_SECRET = process.env.JWT_SECRET || 'nkasbfiuwh92u93u023joiwnijdsbsfibufeyisasjwn938yy9fhnijsfbiw48rhbbjdb3274829IHjaieb8HJABHJIBJIqbdjiwbdia';
 
 class AdminServices {
     async fetchAllAdminsByManagementId(req: Request, res: Response) {
@@ -147,42 +148,40 @@ class AdminServices {
     async loginAdminByEmail(req: Request, res: Response) {
         const query = `SELECT * FROM admin WHERE emailId = ? AND deletedAt IS NULL`;
         try {
-            const { emailId, password } = req.body
-            const fetchAdminResult: any = await execQuery(query, [emailId])
+            const { emailId, password } = req.body;
+            const fetchAdminResult: any = await execQuery(query, [emailId]);
+
             if (fetchAdminResult.length === 0) {
-                return res.status(404).send(`Record not founded`)
+                return res.status(404).send('Record not found');
             }
-            const isPasswordMatch = hashService.comparePassword(password + fetchAdminResult[0].slatWord, fetchAdminResult[0].password)
+
+            const isPasswordMatch = hashService.comparePassword(
+                password + fetchAdminResult[0].slatWord,
+                fetchAdminResult[0].password
+            );
             if (!isPasswordMatch) {
-                return res.status(401).send('Invalid credentials')
+                return res.status(401).send('Invalid credentials');
             }
-            const expirationTime = Math.floor(Date.now() / 1000) + 60 * 60; // 1 hour from now
+
             const payload = {
                 adminId: fetchAdminResult[0].id,
                 emailId: fetchAdminResult[0].emailId,
                 role: 'admin',
-                exp: expirationTime,
             };
-            const privateKeyPem = process.env.JWE_PRIVATE_KEY || '';
-            if (!privateKeyPem) {
-                return res.status(500).send('Server configuration error: Private key not set.');
-            }
-            const privateKey = await crypto.webcrypto.subtle.importKey(
-                'pkcs8',
-                pemToArrayBuffer(privateKeyPem),
-                { name: 'RSASSA-PKCS1-v1_5', hash: 'SHA-256' },
-                false,
-                ['sign']
-            );
-            const jwt = await new SignJWT(payload)
-                .setProtectedHeader({ alg: 'RS256', typ: 'JWT' })
-                .setIssuedAt()
-                .setExpirationTime(expirationTime)
-                .sign(privateKey);
-            return res.status(200).json(    { token: jwt });
-        } catch (error) {
-            return res.status(500).send(`Server Error : ${error}`)
+
+            const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '1h' });
+            return res.status(200).json({ token: token, userData: {
+                id: fetchAdminResult[0].id,
+                firstName: fetchAdminResult[0].firstName,
+                fullName: fetchAdminResult[0].fullName,
+                emailId: fetchAdminResult[0].emailId,
+                profileImage: fetchAdminResult[0].profileImage,
+            } });
+        } catch (error: any) {
+            console.error(error);
+            return res.status(500).send(`Server Error: ${error.message}`);
         }
     }
+
 }
 export default AdminServices

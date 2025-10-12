@@ -14,12 +14,3 @@ export function generateUniqueRandomString() {
   generatedStrings.add(result);
   return result;
 }
-
-export function pemToArrayBuffer(pem: string) {
-   const b64 = pem
-   .replace(/-----BEGIN PRIVATE KEY-----/, '')
-   .replace(/-----END PRIVATE KEY-----/, '')
-   .replace(/\s+/g, '');
-  const binary = Buffer.from(b64, 'base64');
-  return binary.buffer.slice(binary.byteOffset, binary.byteOffset + binary.byteLength);
-}

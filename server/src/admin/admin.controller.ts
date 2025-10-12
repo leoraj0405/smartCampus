@@ -2,7 +2,7 @@ import express from 'express'
 import AdminServices from './admi.service';
 import { storage } from '../config/fileUpload/file.upload';
 import multer from 'multer';
-import { jweAuth } from '../middleware/JWE/jweAuth';
+import { authenticateToken } from '../middleware/JWE/jweAuth';
 
 const route = express.Router()
 const adminService = new AdminServices();
@@ -11,11 +11,11 @@ const upload = multer({
     limits: { fileSize: 1000000 } // 1MB file size limit
 }).single('profileImage');
 
-route.get('/:id', jweAuth, (req, res) => {
+route.get('/:id', authenticateToken, (req, res) => {
     adminService.fetchAllAdminsByManagementId(req, res)
 })
 
-route.post('/', jweAuth, (req, res) => {
+route.post('/', authenticateToken, (req, res) => {
     upload(req, res, (err) => {
         if (err) {
             console.error(err);
@@ -28,7 +28,7 @@ route.post('/', jweAuth, (req, res) => {
     });
 })
 
-route.put('/:id', jweAuth, (req, res) => {
+route.put('/:id', authenticateToken, (req, res) => {
     upload(req, res, (err) => {
         if (err) {
             console.error(err);
@@ -38,11 +38,11 @@ route.put('/:id', jweAuth, (req, res) => {
     });
 })
 
-route.delete('/:id', jweAuth, (req, res) => {
+route.delete('/:id', authenticateToken, (req, res) => {
     adminService.deleteAdminById(req, res)
 })
 
-route.get('/:id', jweAuth, (req, res) => {
+route.get('/:id', authenticateToken, (req, res) => {
     adminService.fetchAdminById(req, res)
 })
 
