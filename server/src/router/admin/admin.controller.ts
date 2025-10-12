@@ -1,8 +1,8 @@
 import express from 'express'
-import AdminServices from './admi.service';
-import { storage } from '../config/fileUpload/file.upload';
+import AdminServices from './admin.service';
+import { storage } from '../../config/fileUpload/file.upload';
 import multer from 'multer';
-import { authenticateToken } from '../middleware/JWE/jweAuth';
+import { authenticateToken } from '../../middleware/JWE/jweAuth';
 
 const route = express.Router()
 const adminService = new AdminServices();

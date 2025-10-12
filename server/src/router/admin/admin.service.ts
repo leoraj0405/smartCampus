@@ -1,12 +1,11 @@
 import { Request, Response } from 'express';
-import { execQuery } from '../config/database/db.connection'
-import HashService from '../utils/password.hash';
+import { execQuery } from '../../config/database/db.connection'
+import HashService from '../../utils/password.hash';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
 import * as jwt from 'jsonwebtoken';
-import { generateUniqueRandomString } from '../utils/commonFunctions';
+import { generateUniqueRandomString } from '../../utils/commonFunctions';
 dotenv.config();
-
 
 const hashService = new HashService()
 const JWT_SECRET = process.env.JWT_SECRET || 'nkasbfiuwh92u93u023joiwnijdsbsfibufeyisasjwn938yy9fhnijsfbiw48rhbbjdb3274829IHjaieb8HJABHJIBJIqbdjiwbdia';
