@@ -96,7 +96,10 @@ class AdminServices {
                 .join(", ");
             const updateValueData = Object.values(reqUpdateValue);
 
-            const query = `UPDATE admin SET ${updateValueObj} WHERE id = ?`;
+            const query = `UPDATE admin 
+                SET ${updateValueObj},
+                updatedAt = CURRENT_TIMESTAMP()
+                WHERE id = ?`;
 
             const updateAdminResult: any = await execQuery(query, [
                 ...updateValueData,

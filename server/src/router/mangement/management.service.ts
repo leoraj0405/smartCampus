@@ -23,7 +23,7 @@ class ManagementServices {
         INSERT INTO management (
             id,
             name,
-            managementType,
+            managementType
         ) VALUES (?, ?, ?) `;
 
         try {
@@ -57,7 +57,9 @@ class ManagementServices {
                 .join(", ");
             const updateValueData = Object.values(reqUpdateValue);
 
-            const query = `UPDATE management SET ${updateValueObj} WHERE id = ?`;
+            const query = `UPDATE management 
+                SET ${updateValueObj}, updatedAt = CURRENT_TIMESTAMP() 
+                WHERE id = ?`;
 
             const upadteManagement: any = await execQuery(query, [
                 ...updateValueData,

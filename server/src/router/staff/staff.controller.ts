@@ -1,18 +1,18 @@
 import express from 'express'
-import AdminServices from './admin.service';
+import StaffServices from './staff.service';
 import { storage } from '../../config/fileUpload/file.upload';
 import multer from 'multer';
 import { authenticateToken } from '../../middleware/JWE/jweAuth';
 
 const route = express.Router()
-const adminService = new AdminServices();
+const staffService = new StaffServices();
 const upload = multer({
     storage: storage,
     limits: { fileSize: 1000000 } // 1MB file size limit
 }).single('profileImage');
 
-route.get('/:id', authenticateToken, (req, res) => {
-    adminService.fetchAllAdminsByManagementId(req, res)
+route.get('/:id', (req, res) => {
+    staffService.fetchStaffByManagementId(req, res)
 })
 
 route.post('/', (req, res) => {
@@ -24,7 +24,7 @@ route.post('/', (req, res) => {
         if (!req.file) {
             return res.status(400).json({ error: 'Please send file' });
         }
-        adminService.createAdmin(req, res)
+        staffService.createStaff(req, res)
     });
 })
 
@@ -34,20 +34,20 @@ route.put('/:id', authenticateToken, (req, res) => {
             console.error(err);
             return res.status(500).json({ error: err });
         }
-        adminService.updateAdminById(req, res)
+        staffService.updateStaffById(req, res)
     });
 })
 
 route.delete('/:id', authenticateToken, (req, res) => {
-    adminService.deleteAdminById(req, res)
+    staffService.deleteStaffById(req, res)
 })
 
 route.get('/:id', authenticateToken, (req, res) => {
-    adminService.fetchAdminById(req, res)
+    staffService.fetchStaffbyId(req, res)
 })
 
 route.post('/login', (req, res) => {
-    adminService.loginAdminByEmail(req, res)
+    staffService.loginStaffByEmail(req, res)
 })
 
 export default route
