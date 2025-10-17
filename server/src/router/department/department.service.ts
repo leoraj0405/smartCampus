@@ -4,7 +4,7 @@ import { generateUniqueRandomString } from '../../utils/commonFunctions';
 
 class DepartmentServices {
     async fetchDepartmentsByMangementId(req: Request, res: Response) {
-        const query = `SELECT * FROM department WHERE managementId = ? deletedAt IS NULL`;
+        const query = `SELECT * FROM department WHERE managementId = ? AND deletedAt IS NULL`;
         try {
             const managementId = req.params.id
             const departmentResponse: any = await execQuery(query, [managementId])
