@@ -29,9 +29,10 @@ export default function AppShellLayout() {
         <Sidebar mobileOpen={mobileOpen} closeMobile={close} />
       </AppShell.Navbar>
 
-      <AppShell.Main>
+      <AppShell.Main style={{ paddingBottom: 60 }}>
         <Outlet />
       </AppShell.Main>
+
       <AppShell.Footer>
         <Footer />
       </AppShell.Footer>

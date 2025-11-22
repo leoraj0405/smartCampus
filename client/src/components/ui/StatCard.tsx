@@ -1,32 +1,42 @@
 // src/components/ui/StatCard.tsx
-import { Card, Group, Text } from "@mantine/core";
+import { Badge, Card, Group, Progress, Stack, Text, ThemeIcon } from "@mantine/core";
 
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  description?: string;
-  icon?: any;
-}
+export default function AdvancedStatCard({ title, value, change, description, icon, color, progress }: any) {
+  const colorMap: any = {
+    blue: '#3b82f6',
+    green: '#10b981',
+    orange: '#f59e0b',
+    red: '#ef4444',
+  };
 
-export default function StatCard({ title, value, description, icon }: StatCardProps) {
   return (
-    <Card shadow="sm" p="md" radius="md" withBorder>
-      <Group justify="space-between" align="flex-start" mb="sm">
-        <div>
-          <Text fz="xs" c="dimmed">
-            {title}
-          </Text>
-          <Text fw={700} fz="xl">
-            {value}
-          </Text>
-        </div>
+    <Card withBorder radius="lg" p="lg" style={{ position: 'relative', overflow: 'hidden' }}>
+      <ThemeIcon
+        size={60}
+        radius="md"
+        variant="light"
+        color={color}
+        style={{ position: 'absolute', top: -10, right: -10, opacity: 0.1 }}
+      >
         {icon}
-      </Group>
-      {description && (
-        <Text fz="xs" c="dimmed">
-          {description}
-        </Text>
-      )}
+      </ThemeIcon>
+      
+      <Stack spacing="xs">
+        <Text size="sm" c="dimmed" fw={500}>{title}</Text>
+        <Group spacing="xs" align="flex-end">
+          <Text fw={700} size="xl">{value}</Text>
+          <Badge 
+            color={change.startsWith('+') ? 'green' : change.startsWith('-') ? 'red' : 'gray'}
+            variant="light"
+            size="sm"
+          >
+            {change}
+          </Badge>
+        </Group>
+        <Text size="xs" c="dimmed">{description}</Text>
+        <Progress value={progress} color={colorMap[color]} size="sm" radius="xl" />
+      </Stack>
     </Card>
   );
 }
+

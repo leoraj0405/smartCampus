@@ -1,4 +1,4 @@
-import { Group, Text, Divider } from "@mantine/core";
+import { Group, Text, Divider, Anchor } from "@mantine/core";
 
 export default function Footer() {
   return (
@@ -13,7 +13,13 @@ export default function Footer() {
         style={{ opacity: 0.9 }}
       >
         <Text fz="xs" c="dimmed">
-          © {new Date().getFullYear()} Developed by leo.
+          © {new Date().getFullYear()} Developed by <Anchor
+            href="https://portfolio-three-rouge-i0duqvzsdo.vercel.app/"
+            target="_blank"
+            underline="always"
+          >
+            Leo
+          </Anchor>
         </Text>
       </Group>
     </>
