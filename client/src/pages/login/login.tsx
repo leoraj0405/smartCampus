@@ -34,22 +34,24 @@ export default function Login() {
     setValues((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleSubmit = async() => {
+  const handleSubmit = async () => {
     try {
       const response = await loginApiServices(values);
-      if(response.status === 200) {
+      console.log(response)
+      if (response.status === 200) {
         localStorage.setItem('token', response?.data?.token)
         localStorage.setItem('profileImage', response?.data?.userData?.profileImage || '')
         navigate('/dashboard')
       }
     } catch (error: any) {
-      if(error?.status === 404) {
+      if (error?.status === 401 || error?.status === 404) {
         Notification({
           message: "Invalid email or password. Kindly verify your credentials and try once more.",
           title: "Error",
           isError: true
         });
-      }else {
+      } else {
+        console.log(error)
         Notification({
           message: "Something went wrong.",
           title: "Error",
@@ -75,7 +77,6 @@ export default function Login() {
     <div
       style={{
         // Using a very light grey or white background for a professional, clean look
-        backgroundColor: theme.colors.gray[1],
         height: "100vh",
         display: "flex",
         justifyContent: "center",
@@ -88,7 +89,7 @@ export default function Login() {
         shadow="xl"
         radius="lg"
         p="xl"
-        style={{ width: 400, maxWidth: "95%", backgroundColor: theme.white }}
+        style={{ width: 400, maxWidth: "95%" }}
       >
         {/* Title using the primary color */}
         <Title order={2} ta="center" mb="lg" fw={700} style={{ color: primaryColor }}>
@@ -110,7 +111,7 @@ export default function Login() {
           value={values.role}
           placeholder="Select your role"
           data={['Admin', 'Staff', 'Student']}
-          onChange={(value) => handleChange("role",  value || 'Admin')}
+          onChange={(value) => handleChange("role", value || 'Admin')}
           required
         />
 

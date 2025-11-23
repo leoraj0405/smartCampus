@@ -14,8 +14,7 @@ export default function AdvancedStatCard({ title, value, change, description, ic
       <ThemeIcon
         size={60}
         radius="md"
-        variant="light"
-        color={color}
+        variant="filled"
         style={{ position: 'absolute', top: -10, right: -10, opacity: 0.1 }}
       >
         {icon}
@@ -26,7 +25,6 @@ export default function AdvancedStatCard({ title, value, change, description, ic
         <Group spacing="xs" align="flex-end">
           <Text fw={700} size="xl">{value}</Text>
           <Badge 
-            color={change.startsWith('+') ? 'green' : change.startsWith('-') ? 'red' : 'gray'}
             variant="light"
             size="sm"
           >

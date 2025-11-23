@@ -6,7 +6,7 @@ export const loginApiServices = (payload: any) => {
         password: payload?.password
     };
 
-    const apiUrl = payload?.role === 'Admin' ? 'admin/login' : 'staff/login'
+    const apiUrl = payload?.role === 'Admin' ? 'admin/login' : payload?.role === 'Staff' ? 'staff/login' : 'students/login'
 
     return axios.post(
         `${import.meta.env.VITE_API_URL}/${apiUrl}`,

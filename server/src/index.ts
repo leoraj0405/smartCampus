@@ -9,6 +9,8 @@ import adminController from './router/admin/admin.controller';
 import managementController from './router/mangement/management.controller';
 import staffController from './router/staff/staff.controller';
 import departmentController from './router/department/department.controller';
+import studentController from './router/student/student.controller';
+
 import path from 'path';
 
 const app = express();
@@ -28,6 +30,7 @@ app.use('/api/admin/', adminController)
 app.use('/api/management/', managementController)
 app.use('/api/staff/', staffController)
 app.use('/api/department/', departmentController);
+app.use('/api/students/', studentController)
 
 
 app.listen(PORT, () => {

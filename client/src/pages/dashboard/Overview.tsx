@@ -8,8 +8,6 @@ import {
   Image,
   Stack,
   Button,
-  Progress,
-  Avatar,
   Paper,
   Box,
 } from "@mantine/core";
@@ -19,8 +17,6 @@ import {
   IconCalendarStats,
   IconArrowRight,
   IconBuilding,
-  IconWifi,
-  IconBook,
   IconChartBar,
   IconTrendingUp,
   IconAlertCircle,
@@ -36,15 +32,14 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell,
   BarChart,
   Bar,
   AreaChart,
   Area,
 } from "recharts";
-import AdvancedStatCard from '../../components/ui/StatCard'
+import AdvancedStatCard from '../../components/ui/dashborad/StatCard'
+import HostelCard from "../../components/ui/dashborad/HostelCard";
+import Announcement from "../../components/ui/dashborad/Announcement";
 
 export default function Overview() {
   // Enhanced data sets
@@ -57,12 +52,6 @@ export default function Overview() {
     { month: "Nov", value: 91, target: 90 },
   ];
 
-  const feeStatusData = [
-    { name: "Paid", value: 78 },
-    { name: "Pending", value: 15 },
-    { name: "Overdue", value: 7 },
-  ];
-
   const performanceData = [
     { subject: "Math", score: 85, avg: 72 },
     { subject: "Science", score: 78, avg: 75 },
@@ -71,14 +60,6 @@ export default function Overview() {
     { subject: "CS", score: 95, avg: 82 },
   ];
 
-  const resourceUsage = [
-    { name: "Library", usage: 75, capacity: 100 },
-    { name: "Labs", usage: 60, capacity: 80 },
-    { name: "Sports", usage: 45, capacity: 90 },
-    { name: "Cafeteria", usage: 85, capacity: 120 },
-  ];
-
-  const COLORS = ["#4caf50", "#ff9800", "#e53935"];
   const HOSTEL_COLORS = ["#6366f1", "#8b5cf6", "#ec4899", "#f59e0b"];
 
   const hostels = [
@@ -176,26 +157,16 @@ export default function Overview() {
         p="lg"
         mb="md"
         style={{
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
           border: 'none'
         }}
       >
         <Group position="apart" mb="md" align="center">
           <Group spacing="xs">
-            <IconPhoto size={24} color="white" />
-            <Text fw={700} size="xl" c="white">
+            <IconPhoto size={24}/>
+            <Text fw={700} size="xl">
               Campus Highlights
             </Text>
           </Group>
-          <Badge
-            variant="filled"
-            color="white"
-            c="blue"
-            size="lg"
-            leftSection={<IconStar size={14} />}
-          >
-            Featured
-          </Badge>
         </Group>
 
         <Grid gutter="lg" align="stretch">
@@ -204,14 +175,12 @@ export default function Overview() {
               radius="md"
               style={{
                 overflow: 'hidden',
-                height: 240,
                 position: 'relative',
                 cursor: 'pointer'
               }}
             >
               <Image
                 src={campusHighlights[0].image}
-                height={240}
                 alt={campusHighlights[0].title}
                 style={{ objectFit: 'cover', transition: 'transform 0.3s' }}
               />
@@ -240,14 +209,12 @@ export default function Overview() {
                   radius="md"
                   style={{
                     overflow: 'hidden',
-                    height: 112,
                     position: 'relative',
                     cursor: 'pointer'
                   }}
                 >
                   <Image
                     src={highlight.image}
-                    height={112}
                     alt={highlight.title}
                     style={{ objectFit: 'cover' }}
                   />
@@ -508,42 +475,6 @@ function EventItem({ title, date, time, location, tag, type }: any) {
 }
 
 // Enhanced Announcement Component
-function Announcement({ text, time, priority }: any) {
-  const priorityColors: any = {
-    info: 'blue',
-    normal: 'gray',
-    warning: 'orange',
-    urgent: 'red',
-  };
 
-  return (
-    <Group align="flex-start" spacing="sm" noWrap>
-      <Avatar size={32} radius="xl" color={priorityColors[priority]}>
-        <IconAlertCircle size={16} />
-      </Avatar>
-      <div style={{ flex: 1 }}>
-        <Text size="sm" style={{ lineHeight: 1.3 }}>{text}</Text>
-        <Text size="xs" c="dimmed" mt={4}>{time}</Text>
-      </div>
-    </Group>
-  );
-}
 
 // Hostel Card Component
-function HostelCard({ name, occupancy, total, warden, color }: any) {
-  return (
-    <Paper p="md" withBorder radius="md">
-      <Group position="apart" align="flex-start" mb="xs">
-        <Text fw={600} size="sm">{name}</Text>
-        <Badge color={occupancy > 90 ? 'red' : occupancy > 75 ? 'yellow' : 'green'} variant="light">
-          {occupancy}%
-        </Badge>
-      </Group>
-      <Progress value={occupancy} color={color} size="md" radius="xl" mb="xs" />
-      <Group position="apart">
-        <Text size="xs" c="dimmed">{occupancy}/{total} students</Text>
-        <Text size="xs" c="dimmed">Warden: {warden.split(' ')[1]}</Text>
-      </Group>
-    </Paper>
-  );
-}
