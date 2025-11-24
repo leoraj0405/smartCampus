@@ -14,10 +14,12 @@ import { useState } from "react";
 import { loginApiServices } from "../../components/api/api.services";
 import { Notification } from "../../components/utils/utils";
 import { useNavigate } from "react-router-dom";
+import { login } from "../../redux/authSlice";
+import { useDispatch } from "react-redux";
 
 export default function Login() {
-  const [isLogin, setIsLogin] = useState(true);
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [values, setValues] = useState({
     email: "",
@@ -37,11 +39,24 @@ export default function Login() {
   const handleSubmit = async () => {
     try {
       const response = await loginApiServices(values);
-      console.log(response)
       if (response.status === 200) {
-        localStorage.setItem('token', response?.data?.token)
-        localStorage.setItem('profileImage', response?.data?.userData?.profileImage || '')
-        navigate('/dashboard')
+        console.log(response)
+        dispatch(
+          login({
+            userData: {...response.data.userData, role: values?.role},
+            token: response.data.token,
+          })
+        );
+        if(values?.role === 'Admin') {
+          navigate('/admindashboard')
+        } 
+        if(values?.role === 'Staff') {
+          navigate('/staffdashboard')
+        }
+        if(values?.role === 'Student') {
+          navigate('/studentdasboard')
+        }
+        
       }
     } catch (error: any) {
       if (error?.status === 401 || error?.status === 404) {
@@ -63,15 +78,8 @@ export default function Login() {
   };
 
   // Check if all required fields are filled and passwords match
-  const isFormValid = isLogin
-    ? !!values.email && !!values.password
-    : !!values.email && !!values.password && !!values.confirmPassword && values.password === values.confirmPassword;
+  const isFormValid = !!values.email && !!values.password
 
-  // Dynamic content based on the current view
-  const title = isLogin ? "Smart Campus Login" : "Create New Account in Smart";
-  const buttonText = isLogin ? "Login" : "Sign Up";
-  const toggleText = isLogin ? "Don't have an account?" : "Already have an account?";
-  const toggleActionText = isLogin ? "Sign Up" : "Login";
 
   return (
     <div
@@ -93,7 +101,7 @@ export default function Login() {
       >
         {/* Title using the primary color */}
         <Title order={2} ta="center" mb="lg" fw={700} style={{ color: primaryColor }}>
-          {title}
+          Smart Login
         </Title>
 
         {/* Form Fields */}
@@ -105,7 +113,6 @@ export default function Login() {
           required
           mb="sm"
         />
-
         <Select
           label="Role"
           value={values.role}
@@ -114,7 +121,6 @@ export default function Login() {
           onChange={(value) => handleChange("role", value || 'Admin')}
           required
         />
-
         <PasswordInput
           label="Password"
           placeholder="Your password"
@@ -124,39 +130,11 @@ export default function Login() {
           mb="sm"
         />
 
-        {!isLogin && (
-          <PasswordInput
-            label="Confirm Password"
-            placeholder="Repeat password"
-            value={values.confirmPassword}
-            onChange={(e) => handleChange("confirmPassword", e.target.value)}
-            required
-            mb="sm"
-          />
-        )}
-
         {/* Action Group */}
-        <Group justify="space-between" mb="lg">
-          {isLogin && (
-            <Anchor size="sm" href="#" style={{ color: primaryColor }}>
-              Forgot password?
-            </Anchor>
-          )}
-
-          <Text fz="sm" c="dimmed">
-            {toggleText}{" "}
-            <Anchor
-              size="sm"
-              onClick={() => {
-                setValues({ email: "", password: "", confirmPassword: "", role: 'Admin' });
-                setIsLogin((prev) => !prev);
-              }}
-              // Toggle link also uses the primary color
-              style={{ color: primaryColor, fontWeight: 600 }}
-            >
-              {toggleActionText}
-            </Anchor>
-          </Text>
+        <Group justify="flex-end" mb="lg">
+          <Anchor size="sm" href="#" style={{ color: primaryColor }}>
+            Forgot password?
+          </Anchor>
         </Group>
 
         {/* Submit Button - Will use the theme's primary color by default */}
@@ -167,7 +145,7 @@ export default function Login() {
           disabled={!isFormValid}
         // Button uses default theme primary color, which is professional
         >
-          {buttonText}
+          Login
         </Button>
 
         {/* Footer Text */}

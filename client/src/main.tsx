@@ -11,6 +11,11 @@ import App from "./App";
 import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 
+import { store, persistor } from "./redux/store";
+import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
+
+
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -18,7 +23,11 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     <MantineProvider defaultColorScheme="light">
       <Notifications />
       <BrowserRouter>
-        <App />
+        <Provider store={store}>
+          <PersistGate loading={null} persistor={persistor}>
+            <App />
+          </PersistGate>
+        </Provider>
       </BrowserRouter>
     </MantineProvider>
   </React.StrictMode>

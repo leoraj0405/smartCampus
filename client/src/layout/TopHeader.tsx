@@ -20,9 +20,11 @@ import {
 } from "@tabler/icons-react";
 import { useState, useEffect } from "react";
 import ThemeToggle from "../components/ui/ThemeToggle";
+import { useSelector } from "react-redux";
 
 export default function TopHeader({ openMobileSidebar }: any) {
   const isMobile = useMediaQuery("(max-width: 768px)");
+  const { userData } = useSelector((state: any) => state);
 
   const [mode, setMode] = useState<"normal" | "search" | "time">("normal");
   const [dateTime, setDateTime] = useState("");
@@ -37,12 +39,12 @@ export default function TopHeader({ openMobileSidebar }: any) {
           month: "short",
           year: "numeric",
         }) +
-          " • " +
-          now.toLocaleTimeString("en-IN", {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: true,
-          })
+        " • " +
+        now.toLocaleTimeString("en-IN", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        })
       );
     };
 
@@ -51,7 +53,8 @@ export default function TopHeader({ openMobileSidebar }: any) {
     return () => clearInterval(interval);
   }, []);
 
-  const profileImage = localStorage.getItem("profileImage");
+  const profileImage = userData?.profileImage;
+  const userName = userData?.firstName;
   const avatarUrl = profileImage
     ? `${import.meta.env.VITE_SERVER_URL}uploads/${profileImage}`
     : null;
@@ -74,9 +77,11 @@ export default function TopHeader({ openMobileSidebar }: any) {
         )}
 
         {!isMobile ? (
-          <Text fw={700} fz="lg">
-            Smart Campus
-          </Text>
+          <>
+            <Text fw={700} fz="lg">
+              Smart Campus
+            </Text>
+          </>
         ) : (
           <Avatar
             src={`/logo.png`}
@@ -176,6 +181,8 @@ export default function TopHeader({ openMobileSidebar }: any) {
                   <IconBell size={20} />
                 </ActionIcon>
 
+                <ThemeToggle />
+
                 {/* Avatar Menu */}
                 <Menu width={200} shadow="md" position="bottom-end">
                   <Menu.Target>
@@ -207,8 +214,6 @@ export default function TopHeader({ openMobileSidebar }: any) {
                     </Menu.Item>
                   </Menu.Dropdown>
                 </Menu>
-
-                <ThemeToggle />
               </Group>
             )}
           </Transition>
