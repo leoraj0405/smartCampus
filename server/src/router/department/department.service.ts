@@ -1,24 +1,23 @@
-import { Request, Response } from 'express';
 import { execQuery } from '../../config/database/db.connection'
 import { generateUniqueRandomString } from '../../utils/commonFunctions';
+import { IServiceResult, IDepartment } from '../../utils/utils';
 
 class DepartmentServices {
-    async fetchDepartmentsByMangementId(req: Request, res: Response) {
+    async fetchDepartmentsByMangementId(managementId: string): Promise<IServiceResult<IDepartment[]>> {
         const query = `SELECT * FROM department WHERE managementId = ? AND deletedAt IS NULL`;
         try {
-            const managementId = req.params.id
             const departmentResponse: any = await execQuery(query, [managementId])
             if (departmentResponse.length !== 0) {
-                return res.status(200).send(departmentResponse)
+                return { statusCode: 200, data: departmentResponse, message: '' }
             } else {
-                return res.status(404).send(`Record not founded`)
+                return { statusCode: 404, data: [], message: 'Record not found' }
             }
         } catch (error) {
-            return res.status(500).send(`Server Error : ${error}`)
+            return { statusCode: 500, data: [], message: error instanceof Error ? error.message : String(error) }
         }
     }
 
-    async createDepartment(req: Request, res: Response) {
+    async createDepartment(body: any): Promise<IServiceResult<null>> {
         const query = `
         INSERT INTO department (
             id,
@@ -27,34 +26,28 @@ class DepartmentServices {
         ) VALUES (?, ?, ?) `;
 
         try {
-            const {
-                name,
-                managementId,
-            } = req.body
+            const { name, managementId } = body
 
             await execQuery(query, [
                 generateUniqueRandomString(),
                 name,
                 managementId,
             ])
-            return res.status(201).send('Department created.')
+            return { statusCode: 201, message: 'Department created.', data: null }
         } catch (error) {
-            return res.status(500).send(`Server Error : ${error}`)
+            return { statusCode: 500, message: error instanceof Error ? error.message : String(error), data: null }
         }
     }
 
-    async updateDepartmentById(req: Request, res: Response) {
+    async updateDepartmentById(departmentId: string, reqUpdateValue: any) {
         try {
-            const departmentId = req.params.id;
-            const reqUpdateValue = { ...req.body };
-
             if (Object.keys(reqUpdateValue).length === 0) {
-                return res.status(400).send("No fields provided for update.");
+                return { statusCode: 400, message: 'No fields provided for update.', data: null }
             }
 
             const updateValueObj = Object.keys(reqUpdateValue)
                 .map((key: string) => `${key} = ?`)
-                .join(", ");
+                .join(', ');
             const updateValueData = Object.values(reqUpdateValue);
 
             const query = `UPDATE department 
@@ -67,42 +60,40 @@ class DepartmentServices {
             ]);
 
             if (departmentResponse.affectedRows !== 0) {
-                this.fetchDepartmentById(req, res)
+                return this.fetchDepartmentById(departmentId)
             } else {
-                return res.status(404).send("management record not found.");
+                return { statusCode: 404, message: 'department record not found.', data: null }
             }
         } catch (error) {
-            return res.status(500).send(`Server Error: ${error}`);
+            return { statusCode: 500, message: error instanceof Error ? error.message : String(error), data: null }
         }
     }
 
-    async deleteDepartmentById(req: Request, res: Response) {
+    async deleteDepartmentById(departmentId: string) {
         const query = `UPDATE department SET deletedAt = NOW() WHERE id = ?`;
         try {
-            const departmentId = req.params.id
             const departmentResponse: any = await execQuery(query, [departmentId])
             if (departmentResponse.affectedRows !== 0) {
-                return res.status(200).send('department deleted successfully.')
+                return { statusCode: 200, message: 'department deleted successfully.' }
             } else {
-                return res.status(404).send('Record not founded')
+                return { statusCode: 404, error: 'Record not found' }
             }
         } catch (error) {
-            return res.status(500).send(`Server Error : ${error}`)
+            return { statusCode: 500, error }
         }
     }
 
-    async fetchDepartmentById(req: Request, res: Response) {
+    async fetchDepartmentById(departmentId: string) {
         const query = `SELECT * FROM department WHERE id = ? AND deletedAt IS NULL`;
         try {
-            const departmentId = req.params.id
             const departmentResponse: any = await execQuery(query, [departmentId])
             if (departmentResponse.length !== 0) {
-                return res.status(200).send(departmentResponse[0])
+                return { statusCode: 200, data: departmentResponse[0], message: '' }
             } else {
-                return res.status(404).send(`Record not founded`)
+                return { statusCode: 404, data: null, message: 'Record not found' }
             }
         } catch (error) {
-            return res.status(500).send(`Server Error : ${error}`)
+            return { statusCode: 500, data: null, message: error instanceof Error ? error.message : String(error) }
         }
     }
 

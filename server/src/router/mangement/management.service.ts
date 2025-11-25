@@ -1,24 +1,23 @@
-import { Request, Response } from 'express';
 import { execQuery } from '../../config/database/db.connection'
 import { generateUniqueRandomString } from '../../utils/commonFunctions';
+import { IServiceResult, IManagement } from '../../utils/utils';
 
 class ManagementServices {
-    async fetchManagements(req: Request, res: Response) {
-        const query = `SELECT * FROM management deletedAt IS NULL`;
+    async fetchManagements(): Promise<IServiceResult<IManagement[]>> {
+        const query = `SELECT * FROM management WHERE deletedAt IS NULL`;
         try {
-            const managementId = req.params.id
-            const fetchManagementResult: any = await execQuery(query, [managementId])
+            const fetchManagementResult: any = await execQuery(query, [])
             if (fetchManagementResult.length !== 0) {
-                return res.status(200).send(fetchManagementResult)
+                return { statusCode: 200, data: fetchManagementResult, message: '' }
             } else {
-                return res.status(404).send(`Record not founded`)
+                return { statusCode: 404, data: null, message: 'Record not found' }
             }
         } catch (error) {
-            return res.status(500).send(`Server Error : ${error}`)
+            return { statusCode: 500, data: null, message: error instanceof Error ? error.message : String(error) }
         }
     }
 
-    async createMangement(req: Request, res: Response) {
+    async createMangement(body: any): Promise<IServiceResult<null>> {
         const query = `
         INSERT INTO management (
             id,
@@ -27,34 +26,27 @@ class ManagementServices {
         ) VALUES (?, ?, ?) `;
 
         try {
-            const {
-                name,
-                managementType,
-            } = req.body
-
-            const insetManagementResult = await execQuery(query, [
+            const { name, managementType } = body
+            await execQuery(query, [
                 generateUniqueRandomString(),
                 name,
                 managementType,
             ])
-            return res.status(201).send('Management created.')
+            return { statusCode: 201, message: 'Management created.', data: null }
         } catch (error) {
-            return res.status(500).send(`Server Error : ${error}`)
+            return { statusCode: 500, message: error instanceof Error ? error.message : String(error), data: null }
         }
     }
 
-    async upadteManagementById(req: Request, res: Response) {
+    async upadteManagementById(managementId: string, reqUpdateValue: any): Promise<IServiceResult<any>> {
         try {
-            const managementId = req.params.id;
-            const reqUpdateValue = { ...req.body };
-
             if (Object.keys(reqUpdateValue).length === 0) {
-                return res.status(400).send("No fields provided for update.");
+                return { statusCode: 400, message: 'No fields provided for update.', data: null }
             }
 
             const updateValueObj = Object.keys(reqUpdateValue)
                 .map((key: string) => `${key} = ?`)
-                .join(", ");
+                .join(', ');
             const updateValueData = Object.values(reqUpdateValue);
 
             const query = `UPDATE management 
@@ -67,42 +59,40 @@ class ManagementServices {
             ]);
 
             if (upadteManagement.affectedRows !== 0) {
-                this.fetchMangementById(req, res)
+                return this.fetchMangementById(managementId)
             } else {
-                return res.status(404).send("management record not found.");
+                return { statusCode: 404, message: 'management record not found.', data: null }
             }
         } catch (error) {
-            return res.status(500).send(`Server Error: ${error}`);
+            return { statusCode: 500, message: error instanceof Error ? error.message : String(error), data: null }
         }
     }
 
-    async deleteManageMentbyId(req: Request, res: Response) {
+    async deleteManageMentbyId(managementId: string): Promise<IServiceResult<null>> {
         const query = `UPDATE management SET deletedAt = NOW() WHERE id = ?`;
         try {
-            const managementId = req.params.id
             const deleteManageMentResult: any = await execQuery(query, [managementId])
             if (deleteManageMentResult.affectedRows !== 0) {
-                return res.status(200).send('Management deleted successfully.')
+                return { statusCode: 200, message: 'Management deleted successfully.', data: null }
             } else {
-                return res.status(404).send('Record not founded')
+                return { statusCode: 404, message: 'Record not found', data: null }
             }
         } catch (error) {
-            return res.status(500).send(`Server Error : ${error}`)
+            return { statusCode: 500, message: error instanceof Error ? error.message : String(error), data: null }
         }
     }
 
-    async fetchMangementById(req: Request, res: Response) {
+    async fetchMangementById(managementId: string): Promise<IServiceResult<IManagement>> {
         const query = `SELECT * FROM management WHERE id = ? AND deletedAt IS NULL`;
         try {
-            const managementId = req.params.id
             const fetchAllAdminByManagementId: any = await execQuery(query, [managementId])
             if (fetchAllAdminByManagementId.length !== 0) {
-                return res.status(200).send(fetchAllAdminByManagementId[0])
+                return { statusCode: 200, data: fetchAllAdminByManagementId[0], message: '' }
             } else {
-                return res.status(404).send(`Record not founded`)
+                return { statusCode: 404, data: null, message: 'Record not found' }
             }
         } catch (error) {
-            return res.status(500).send(`Server Error : ${error}`)
+            return { statusCode: 500, data: null, message: error instanceof Error ? error.message : String(error) }
         }
     }
 
