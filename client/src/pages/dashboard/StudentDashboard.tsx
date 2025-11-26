@@ -193,7 +193,6 @@ const StudentDashboard = () => {
   return (
     <Container fluid p="md" style={{ 
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)'
     }}>
       {/* Header */}
       <Card 
@@ -202,7 +201,6 @@ const StudentDashboard = () => {
         radius="lg" 
         mb="xl"
         style={{
-          background: `linear-gradient(45deg, ${theme.colors.blue[6]}, ${theme.colors.cyan[6]})`,
           color: 'white'
         }}
       >
@@ -231,7 +229,6 @@ const StudentDashboard = () => {
               radius="xl"
               style={{
                 border: `3px solid ${theme.colors.blue[3]}`,
-                background: `linear-gradient(45deg, ${theme.colors.blue[4]}, ${theme.colors.cyan[4]})`
               }}
             >
               <IconUser size={30} style={{ color: 'white' }} />
@@ -303,9 +300,6 @@ const StudentDashboard = () => {
               <Avatar 
                 size={80} 
                 radius="lg"
-                style={{
-                  background: `linear-gradient(45deg, ${theme.colors.blue[6]}, ${theme.colors.cyan[6]})`
-                }}
               >
                 <IconSchool size={40} style={{ color: 'white' }} />
               </Avatar>
@@ -393,7 +387,6 @@ const StudentDashboard = () => {
                     withBorder
                     style={{
                       borderLeft: `4px solid ${theme.colors[getSubjectTypeColor(cls.type)][6]}`,
-                      background: isCurrent ? theme.colors.blue[0] : 'transparent',
                       transition: 'all 0.2s ease'
                     }}
                     sx={{
@@ -443,10 +436,8 @@ const StudentDashboard = () => {
           <Tabs 
             defaultValue="timetable" 
             variant="pills"
-            color="blue"
             styles={{
               tabsList: {
-                background: theme.colors.gray[0],
                 padding: theme.spacing.sm,
                 borderRadius: theme.radius.lg
               }
@@ -554,7 +545,6 @@ const StudentDashboard = () => {
                       withBorder
                       style={{
                         borderLeft: `4px solid ${theme.colors[getImportanceColor(exam.importance)][6]}`,
-                        background: `linear-gradient(135deg, ${theme.colors.gray[0]} 0%, ${theme.colors.gray[1]} 100%)`
                       }}
                     >
                       <Group position="apart" align="flex-start">
@@ -710,7 +700,6 @@ const StudentDashboard = () => {
                           announcement.urgency === 'warning' ? theme.colors.orange[6] : theme.colors.blue[6]
                         }`,
                         opacity: announcement.read ? 0.8 : 1,
-                        background: announcement.read ? theme.colors.gray[0] : 'white'
                       }}
                       sx={{
                         '&:hover': {
