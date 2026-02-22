@@ -184,6 +184,7 @@ class AdminServices {
                     fullName: fetchAdminResult[0].fullName,
                     emailId: fetchAdminResult[0].emailId,
                     profileImage: fetchAdminResult[0].profileImage,
+                    managementId: fetchAdminResult[0].managementId
                 },
                 message: ''
             };

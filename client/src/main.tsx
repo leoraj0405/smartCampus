@@ -12,6 +12,8 @@ import "@mantine/core/styles.css";
 import "@mantine/notifications/styles.css";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
+
+
   <React.StrictMode>
     <ColorSchemeScript defaultColorScheme="light" />
     <MantineProvider
@@ -19,7 +21,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       withGlobalClasses
       defaultColorScheme="light"
     >
-      <Notifications />
+      <Notifications position="top-right" />
       <BrowserRouter>
         <App />
       </BrowserRouter>

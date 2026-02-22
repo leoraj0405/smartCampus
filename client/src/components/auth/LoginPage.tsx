@@ -12,8 +12,31 @@ import {
 } from '@mantine/core';
 import { IconMail, IconLock } from '@tabler/icons-react';
 import { authCardStyle } from '../../styles/auth.style';
+import useLoginHook from '../../hooks/auth/useLogin';
 
 export default function Login() {
+  const {
+    handleLogin,
+    btnLoading,
+    setEmailId,
+    emailId,
+    setPassword,
+    password,
+    role,
+    setRole
+  } = useLoginHook();
+
+    const handleRoleChange = (e: string | null) => {
+      if(e === 'admin') {
+        setRole('admin')
+      }
+      if(e === 'staff') {
+        setRole('staff')
+      }
+      if(e === 'student') {
+        setRole('student')
+      }
+    }
   return (
     <Center h="100vh" bg="gray.1">
       <Paper p="xl" radius="md" shadow="sm" style={authCardStyle}>
@@ -40,6 +63,8 @@ export default function Login() {
             placeholder="admin@example.com"
             leftSection={<IconMail size={16} />}
             required
+            value={emailId}
+            onChange={(e) => setEmailId(e.target.value)}
           />
 
           <Select
@@ -47,6 +72,8 @@ export default function Login() {
             placeholder='Select your role'
             data={['admin', 'staff', 'student']}
             required
+            value={role}
+            onChange={(e) => handleRoleChange(e)}
           />
 
           <PasswordInput
@@ -54,9 +81,11 @@ export default function Login() {
             placeholder="••••••••"
             leftSection={<IconLock size={16} />}
             required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
 
-          <Button fullWidth mt="sm">
+          <Button fullWidth mt="sm" loading={btnLoading} onClick={handleLogin}>
             Login
           </Button>
 

@@ -1,9 +1,9 @@
 import { Route, Routes } from "react-router-dom";
 import Layout from "./layouts/AppLayout";
-import AdminDashBoard from "./pages/dashboard/AdminPage";
-import StaffDashBoard from "./pages/dashboard/StaffPage";
-import Login from "./pages/auth/LoginPage";
-import Signup from "./pages/auth/SignupForm";
+import AdminDashBoard from "./components/dashboard/AdminPage";
+import StaffDashBoard from "./components/dashboard/StaffPage";
+import Login from "./components/auth/LoginPage";
+import Signup from "./components/auth/SignupForm";
 
 export default function App() {
   return (
