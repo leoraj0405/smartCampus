@@ -3,13 +3,15 @@ import AdminServices from './admin.service';
 import { storage } from '../../config/fileUpload/file.upload';
 import multer from 'multer';
 import { authenticateToken } from '../../middleware/JWE/jweAuth';
-import { IServiceResult, IAdmin } from '../../utils/utils';
+import { IServiceResult, IAdmin, IManagement } from '../../utils/utils';
+import ManagementServices from '../mangement/management.service';
 
 const route = express.Router()
 const adminService = new AdminServices();
+const managementService = new ManagementServices();
 const upload = multer({
     storage: storage,
-    limits: { fileSize: 1000000 } // 1MB file size limit
+    limits: { fileSize: 2000000 } // 2MB file size limit
 }).single('profileImage');
 
 route.get('/:id', authenticateToken, async (req, res) => {
@@ -25,7 +27,6 @@ route.get('/:id', authenticateToken, async (req, res) => {
 route.post('/', (req, res) => {
     upload(req, res, async (err) => {
         if (err) {
-            console.error(err);
             return res.status(500).json({ error: err });
         }
         const profileImage = req.file?.filename || null
@@ -83,6 +84,33 @@ route.post('/login', async (req, res) => {
     } else {
         res.status(response?.statusCode || 500).json({ error: response?.message || response })
     }
+})
+
+route.post('/overview', async (req, res) => {
+    const { 
+        managementId, 
+        adminId 
+    } = req.body;
+    const response = {
+        managementData: {},
+        userData: {} 
+    }
+    const managementData: IServiceResult<IManagement> = await managementService.fetchMangementById(managementId)
+    if (managementData.statusCode === 200) {
+        response.managementData = {
+            managementId: managementData.data?.id,
+            name: managementData.data?.name,
+            images: managementData.data?.images,
+            about: managementData?.data?.about
+        }
+    } else {
+        return res.status(managementData.statusCode).json({
+            error: managementData.error,
+            message: managementData.message
+        })
+    }
+    
+    return res.status(200).send(response)
 })
 
 export default route

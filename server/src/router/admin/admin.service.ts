@@ -56,9 +56,6 @@ class AdminServices {
                 phoneNumber,
             } = body
 
-            if (!profileImage) {
-                return { statusCode: 400, message: 'No file uploaded.', data: null };
-            }
             const randomWord = crypto.randomBytes(15).toString('base64').replace(/[^a-zA-Z0-9]/g, '').slice(0, 20);
             const fullName = `${firstName} ${lastName}`
             const hashedPassword = hashService.hashPassword(password + randomWord)

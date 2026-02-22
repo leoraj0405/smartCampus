@@ -85,14 +85,29 @@ class ManagementServices {
     async fetchMangementById(managementId: string): Promise<IServiceResult<IManagement>> {
         const query = `SELECT * FROM management WHERE id = ? AND deletedAt IS NULL`;
         try {
-            const fetchAllAdminByManagementId: any = await execQuery(query, [managementId])
-            if (fetchAllAdminByManagementId.length !== 0) {
-                return { statusCode: 200, data: fetchAllAdminByManagementId[0], message: '' }
+            const fetchManagementId: any = await execQuery(query, [managementId])
+            if (fetchManagementId.length !== 0) {
+                return { statusCode: 200, data: fetchManagementId[0], message: '' }
             } else {
                 return { statusCode: 404, data: null, message: 'Record not found' }
             }
         } catch (error) {
             return { statusCode: 500, data: null, message: error instanceof Error ? error.message : String(error) }
+        }
+    }
+
+    async uploadCampusImages(images: string[], id: string) {
+        const query = `UPDATE management SET images = ? where id = ?` 
+        try {
+            const res: any = await execQuery(query, [JSON.stringify(images), id])
+            if(res.affectedRows === 0) {
+                return { statusCode: 404, message: 'Record not found', data: null }
+            }else {
+                const result = this.fetchMangementById(id)
+                return result
+            }
+        } catch (error) {
+            return { statusCode: 500, message: error instanceof Error ? error.message : String(error), data: null }
         }
     }
 

@@ -128,6 +128,8 @@ export interface IManagement {
     id: string;
     name: string;
     managementType?: string;
+    images?: string[],
+    about?: string;
 }
 
 // Student helper types (keep original names for compatibility)
