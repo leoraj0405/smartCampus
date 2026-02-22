@@ -1,6 +1,7 @@
 /server/node_modules
 /server/.vscode
 /server/dist
+/server/.env
 
 
 # Logs
@@ -16,6 +17,7 @@
 /client/dist
 /client/dist-ssr
 /client/*.local
+/client/.env
 
 # Editor directories and files
 /client/.vscode/*
