@@ -15,7 +15,6 @@ class StaffServices {
         const responseObj = {
             data: [],
             pagination: {
-                totalRecords: 0,
                 totalPages: 0,
                 currentPage: 0,
                 pageSize: 0
@@ -24,7 +23,8 @@ class StaffServices {
                 searchTerm: '',
                 searchBy: '',
                 searchType: ''
-            }
+            },
+            totalRecords: 0,
         }
         const query = `SELECT * FROM staff WHERE managementId = ? AND deletedAt IS NULL`;
         const countQuery = `SELECT COUNT(*) as total FROM staff WHERE managementId = ? AND deletedAt IS NULL`;
@@ -56,7 +56,7 @@ class StaffServices {
             }
             const totalQuery: any = await execQuery(countQuery, [managementId])
             const totalRecords = totalQuery[0]?.total || 0;
-            responseObj.pagination.totalRecords = totalRecords;
+            responseObj.totalRecords = totalRecords;
             if (totalQuery[0].total === 0) {
                 return { statusCode: 404, data: responseObj, message: 'Record not found' };
             }

@@ -144,10 +144,10 @@ class AdminServices {
             if (fetchAdminResult.length !== 0) {
                 return { statusCode: 200, data: fetchAdminResult[0], message: '' };
             } else {
-                return { statusCode: 404, data: [], message: 'Record not found' };
+                return { statusCode: 404, data: {}, message: 'Record not found' };
             }
         } catch (error) {
-            return { statusCode: 500, data: [], message: error instanceof Error ? error.message : String(error) };
+            return { statusCode: 500, data: {}, message: error instanceof Error ? error.message : String(error) };
         }
     }
 

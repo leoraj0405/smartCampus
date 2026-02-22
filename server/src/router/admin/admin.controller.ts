@@ -3,12 +3,20 @@ import AdminServices from './admin.service';
 import { storage } from '../../config/fileUpload/file.upload';
 import multer from 'multer';
 import { authenticateToken } from '../../middleware/JWE/jweAuth';
-import { IServiceResult, IAdmin, IManagement } from '../../utils/utils';
+import { IServiceResult, IAdmin, IManagement, IDepartment } from '../../utils/utils';
 import ManagementServices from '../mangement/management.service';
+import DepartmentServices from '../department/department.service';
+import Studentservices from '../student/student.service';
+import StaffServices from '../staff/staff.service';
 
 const route = express.Router()
 const adminService = new AdminServices();
 const managementService = new ManagementServices();
+const departmentService = new DepartmentServices();
+const studentsServices = new Studentservices();
+const staffService = new StaffServices();
+
+
 const upload = multer({
     storage: storage,
     limits: { fileSize: 2000000 } // 2MB file size limit
@@ -86,30 +94,55 @@ route.post('/login', async (req, res) => {
     }
 })
 
-route.post('/overview', async (req, res) => {
-    const { 
-        managementId, 
-        adminId 
+route.post('/overview', authenticateToken, async (req, res) => {
+    const {
+        managementId,
+        adminId
     } = req.body;
     const response = {
         managementData: {},
-        userData: {} 
+        userData: {},
+        departmentData: {},
+        students: {},
+        staffs: {}
     }
+    const { limit = 10, page = 1, searchTerm = '', searchBy = 'fullName', searchType = 'contains' } = req.body || {}
+
+    const adminData: IServiceResult<IAdmin> = await adminService.fetchAdminById(adminId)
     const managementData: IServiceResult<IManagement> = await managementService.fetchMangementById(managementId)
+    const departmentData: IServiceResult<IDepartment[]> = await departmentService.fetchDepartmentsByMangementId(managementId)
+    const studentData: IServiceResult<any> = await studentsServices.fetchStudentsByManagementId({
+        managementId,
+        limit: 10,
+        page: 1,
+        searchTerm: '',
+        searchBy: 'fullName',
+        searchType: 'contains'
+    })
+    const staffData: IServiceResult<any> = await staffService.fetchStaffByManagementId(managementId, { limit, page, searchTerm, searchBy, searchType })
+
     if (managementData.statusCode === 200) {
-        response.managementData = {
-            managementId: managementData.data?.id,
-            name: managementData.data?.name,
-            images: managementData.data?.images,
-            about: managementData?.data?.about
-        }
-    } else {
-        return res.status(managementData.statusCode).json({
-            error: managementData.error,
-            message: managementData.message
+        response.managementData = managementData?.data || {}
+    }
+    if (departmentData?.statusCode === 200) {
+        response.departmentData = departmentData?.data || []
+    }
+    if (adminData?.statusCode === 200) {
+        response.userData = adminData?.data || {}
+    }
+    if (studentData?.statusCode === 200) {
+        response.students = studentData?.data
+    }
+    if(staffData?.statusCode === 200) {
+        response.staffs = staffData?.data
+    }
+    if (managementData?.statusCode !== 200 || departmentData?.statusCode !== 200) {
+        const statusCode = managementData?.statusCode || departmentData?.statusCode || adminData?.statusCode || studentData?.statusCode || staffData?.statusCode || 500
+        const error = managementData?.message || departmentData?.message || adminData?.message || studentData?.message || staffData?.message ||  'something went wrong try again.'
+        return res.status(statusCode).json({
+            message: error
         })
     }
-    
     return res.status(200).send(response)
 })
 
