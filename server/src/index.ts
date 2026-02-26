@@ -10,16 +10,19 @@ import managementController from './router/mangement/management.controller';
 import staffController from './router/staff/staff.controller';
 import departmentController from './router/department/department.controller';
 import studentController from './router/student/student.controller';
+import eventsController from './router/events/events.controller';
 
 import path from 'path';
 
 const app = express();
 const PORT = process.env.SERVER_PORT || 3200;
+const FRONT_END_BASE_URL = process.env.FRONT_END_BASE_URL
 
 app.use(express.json());
+app.use(bodyParser.json());
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use(cros({
-  origin: "http://localhost:5173",
+  origin: FRONT_END_BASE_URL,
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
@@ -31,6 +34,7 @@ app.use('/api/management/', managementController)
 app.use('/api/staff/', staffController)
 app.use('/api/department/', departmentController);
 app.use('/api/students/', studentController)
+app.use('/api/events/', eventsController)
 
 
 app.listen(PORT, () => {

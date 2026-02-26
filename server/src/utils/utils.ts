@@ -163,3 +163,24 @@ export interface IInsertStudent {
     profileImage: string;
     managementId: string;
 }
+
+export interface IEvents {
+  id: string;
+  eventTitle: string;
+  eventDescription: string;
+  eventType: "1" | "2" | "3" | "4" | "5" | "6" | "7";
+  targetAudience: "0" | "1" | "2";
+  eventStartDate: string;          // ISO date string
+  eventEndDate: string;            // ISO date string
+  registrationDeadline: string;    // ISO date string
+  venue: string;
+  maxParticipants: number;
+  registrationRequired: boolean | number;
+  managementId: string;
+  eventBanner: string;
+  status: "1" | "2" | "3" | "4";
+  createdBy: string;
+  createdAt: string;               // ISO date string
+  updatedAt: string;               // ISO date string
+  deletedAt: string | null;
+}
