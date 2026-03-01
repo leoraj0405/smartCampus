@@ -234,7 +234,7 @@ class StaffServices {
         try {
             const staffResponse: any = await execQuery(query, [emailId]);
             if (staffResponse.length === 0) {
-                return { statusCode: 404, message: 'Record not found', token: '', userData: {}, data: null };
+                return { statusCode: 401, message: 'Invalid credentials', token: '', userData: {}, data: null };
             }
 
             const isPasswordMatch = hashService.comparePassword(

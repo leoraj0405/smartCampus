@@ -160,7 +160,7 @@ class AdminServices {
             const fetchAdminResult = await execQuery(query, [emailId]) as DBAdmin[];
 
             if (!fetchAdminResult || fetchAdminResult.length === 0) {
-                return { statusCode: 404, message: 'Record not found', token: '', userData: {}, data: null };
+                return { statusCode: 401, message: 'unauthorized', token: '', userData: {}, data: null };
             }
 
             const isPasswordMatch = hashService.comparePassword(
