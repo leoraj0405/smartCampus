@@ -55,7 +55,7 @@ route.put('/:id', authenticateToken, (req, res) => {
         }
         const adminId = req.params.id
         const profileImage = req.file?.filename || null
-        const response: IServiceResult<IAdmin> = await adminService.updateAdminById(adminId, { ...req.body }, profileImage)
+        const response: IServiceResult<IAdmin | null> = await adminService.updateAdminById(adminId, { ...req.body }, profileImage)
         if (response?.statusCode === 200) {
             res.status(200).json(response?.data)
         } else {
@@ -76,7 +76,7 @@ route.delete('/:id', authenticateToken, async (req, res) => {
 
 route.get('/:id', authenticateToken, async (req, res) => {
     const adminId = req.params.id
-    const response: IServiceResult<IAdmin> = await adminService.fetchAdminById(adminId)
+    const response: IServiceResult<IAdmin | null> = await adminService.fetchAdminById(adminId)
     if (response?.statusCode === 200) {
         res.status(200).json(response.data)
     } else {
@@ -108,7 +108,7 @@ route.post('/overview', authenticateToken, async (req, res) => {
     }
     const { limit = 10, page = 1, searchTerm = '', searchBy = 'fullName', searchType = 'contains' } = req.body || {}
 
-    const adminData: IServiceResult<IAdmin> = await adminService.fetchAdminById(adminId)
+    const adminData: IServiceResult<IAdmin | null> = await adminService.fetchAdminById(adminId)
     const managementData: IServiceResult<IManagement> = await managementService.fetchMangementById(managementId)
     const departmentData: IServiceResult<IDepartment[]> = await departmentService.fetchDepartmentsByMangementId(managementId)
     const studentData: IServiceResult<any> = await studentsServices.fetchStudentsByManagementId({

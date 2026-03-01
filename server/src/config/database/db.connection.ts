@@ -1,4 +1,4 @@
-import mysql from 'mysql2';
+import mysql, { RowDataPacket, OkPacket, ResultSetHeader } from 'mysql2';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -10,13 +10,15 @@ const db = mysql.createPool({
     database: process.env.DB_NAME,
 });
 
-db.on('connection', (connection: any) => {
+db.on('connection', (connection: mysql.PoolConnection) => {
     console.log('New DB connection established.');
 });
 
-export const execQuery = (query: string, queryInput?: any) => {
+export type DBResult = RowDataPacket[] | OkPacket | ResultSetHeader;
+
+export const execQuery = (query: string, queryInput?: Array<string | number | boolean | null | object>): Promise<DBResult> => {
     return new Promise((resolve, reject) => {
-        db.query(query, queryInput, (error: any, result: any) => {
+        db.query(query, queryInput as any, (error: mysql.QueryError | null, result: DBResult) => {
             if(error) {
                 reject(error)
             }else {

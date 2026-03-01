@@ -1,5 +1,6 @@
 import { execQuery } from "../../config/database/db.connection"
 import { generateUniqueRandomString } from "../../utils/commonFunctions";
+import { IEvents } from '../../utils/utils';
 
 class EventServices {
     async fetchEventsByManagementId(managementId: string, sortBy: string, sortOrder: string) {
@@ -22,8 +23,8 @@ class EventServices {
             ORDER BY ${safeSortBy} ${safeSortOrder};
             `;
         try {
-            const response: any = await execQuery(FETCH_QUERY, [managementId, sortBy, sortOrder])
-            if (response?.length > 0) {
+            const response = await execQuery(FETCH_QUERY, [managementId, sortBy, sortOrder]) as IEvents[]
+            if (response && response.length > 0) {
                 return {
                     statusCode: 200,
                     message: '',
@@ -104,8 +105,9 @@ class EventServices {
                 status,
                 createdBy
             ]
-            const response: any = await execQuery(INSERT_QUERY, postArray)
-            if (response.affectedRows === 1) {
+            const response = await execQuery(INSERT_QUERY, postArray)
+            const ir = response as { affectedRows?: number };
+            if (ir.affectedRows === 1) {
                 return {
                     statusCode: 201,
                     message: 'event created.',
@@ -139,11 +141,11 @@ class EventServices {
     `;
 
         try {
-            const result: any = await execQuery(UPDATE_COMPLETED_QUERY);
-
+            const result = await execQuery(UPDATE_COMPLETED_QUERY);
+            const rr = result as { affectedRows?: number };
             return {
                 success: true,
-                affectedRows: result.affectedRows
+                affectedRows: rr.affectedRows
             };
 
         } catch (error) {
@@ -165,11 +167,11 @@ class EventServices {
     `;
 
         try {
-            const result: any = await execQuery(UPDATE_ONGOING_QUERY);
-
+            const result = await execQuery(UPDATE_ONGOING_QUERY);
+            const rr = result as { affectedRows?: number };
             return {
                 success: true,
-                affectedRows: result.affectedRows
+                affectedRows: rr.affectedRows
             };
 
         } catch (error) {
@@ -180,10 +182,11 @@ class EventServices {
     }
 
     async deleteEventById(eventId: string, managementId: string) {
-        const query = `UPDATE events SET deletedAt = NOW(), status = "4" WHERE id = ? AND managementdId = ? `;
+        const query = `UPDATE events SET deletedAt = NOW(), status = "4" WHERE id = ? AND managementId = ? `;
         try {
-            const response: any = await execQuery(query, [eventId, managementId])
-            if (response.affectedRows !== 0) {
+            const response = await execQuery(query, [eventId, managementId])
+            const dr = response as { affectedRows?: number };
+            if (dr.affectedRows && dr.affectedRows !== 0) {
                 return { statusCode: 200, message: 'event deleted successfully.', data: null };
             } else {
                 return { statusCode: 404, message: 'Record not found', data: null };
@@ -194,16 +197,48 @@ class EventServices {
     }
 
     async fetchEventById(eventId: string, managementId: string) {
-        const query = `SELECT * FROM events  WHERE id = ? AND managementdId = ? AND deletedAt IS NULL `;
+        const query = `SELECT * FROM events  WHERE id = ? AND managementId = ? AND deletedAt IS NULL `;
         try {
-            const response: any = await execQuery(query, [eventId, managementId])
-            if (response.affectedRows !== 0) {
-                return { statusCode: 200, message: 'eventId deleted successfully.', data: null };
+            const response = await execQuery(query, [eventId, managementId]) as IEvents[]
+            if (response && response.length !== 0) {
+                return { statusCode: 200, message: '', data: response[0] };
             } else {
                 return { statusCode: 404, message: 'Record not found', data: null };
             }
         } catch (error) {
             return { statusCode: 500, message: error instanceof Error ? error.message : String(error), data: null };
+        }
+    }
+
+    async updateEvents(eventId: string, managementId: string, reqUpdateValue: Record<string, string | number | boolean | null>) {
+        try {
+            if (Object.keys(reqUpdateValue).length === 0) {
+                return { statusCode: 400, message: 'No fields provided for update.', data: null }
+            }
+
+            const updateValueObj = Object.keys(reqUpdateValue)
+                .map((key: string) => `${key} = ?`)
+                .join(', ');
+            const updateValueData = Object.values(reqUpdateValue);
+
+            const query = `UPDATE events 
+                    SET ${updateValueObj}, updatedAt = CURRENT_TIMESTAMP() 
+                    WHERE id = ? AND managementId = ?`;
+
+            const upadteManagement = await execQuery(query, [
+                ...updateValueData,
+                eventId,
+                managementId,
+            ]);
+
+            const ur = upadteManagement as { affectedRows?: number };
+            if (ur.affectedRows && ur.affectedRows !== 0) {
+                return this.fetchEventById(eventId, managementId)
+            } else {
+                return { statusCode: 404, message: 'event record not found.', data: null }
+            }
+        } catch (error) {
+            return { statusCode: 500, message: error instanceof Error ? error.message : String(error), data: null }
         }
     }
 }

@@ -178,7 +178,7 @@ class StaffServices {
             const updateValueObj = Object.keys(reqUpdateValue)
                 .map((key: string) => `${key} = ?`)
                 .join(', ');
-            const updateValueData = Object.values(reqUpdateValue);
+            const updateValueData: any = Object.values(reqUpdateValue);
 
             const query = `UPDATE staff 
                 SET ${updateValueObj},

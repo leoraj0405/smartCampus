@@ -1,10 +1,8 @@
 import express from 'express'
 import ManagementServices from './management.service';
-import { authenticateToken } from '../../middleware/JWE/jweAuth';
 import { IServiceResult, IManagement } from '../../utils/utils';
 import multer from 'multer';
 import { storage } from '../../config/fileUpload/file.upload';
-import path from 'path';
 
 const route = express.Router()
 const managementService = new ManagementServices();
@@ -33,7 +31,7 @@ route.post('/', async (req, res) => {
 
 route.put('/:id', async (req, res) => {
     const managementId = req.params.id
-    const response: IServiceResult<IManagement> = await managementService.upadteManagementById(managementId, req.body)
+    const response: IServiceResult<IManagement | null> = await managementService.upadteManagementById(managementId, req.body)
     if (response?.statusCode === 200) {
         res.status(200).json(response.data)
     } else {
@@ -43,7 +41,7 @@ route.put('/:id', async (req, res) => {
 
 route.get('/:id', async (req, res) => {
     const managementId = req.params.id
-    const response: IServiceResult<IManagement> = await managementService.fetchMangementById(managementId)
+    const response: IServiceResult<IManagement | null> = await managementService.fetchMangementById(managementId)
     if (response?.statusCode === 200) {
         res.status(200).json(response)
     } else {
@@ -69,8 +67,8 @@ route.post('/:id', async (req, res) => {
         } else {
             const managementId = req.params.id
             const files = req.files as Express.Multer.File[];
-            const imagesArr = files?.map((file: any) => file.filename)
-            const response: IServiceResult<IManagement> = await managementService.uploadCampusImages(imagesArr, managementId)
+            const imagesArr = files?.map((file: Express.Multer.File) => file.filename)
+            const response: IServiceResult<IManagement | null> = await managementService.uploadCampusImages(imagesArr, managementId)
             if (response?.statusCode === 200) {
                 res.status(200).json(response.data)
             } else {

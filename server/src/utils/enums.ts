@@ -19,3 +19,8 @@ export enum EventStatus {
     'Completed' = 3,
     'Cancelled' = 4
 }
+
+export enum HostelType {
+    'Boys' = 1,
+    'Girls' = 2
+}

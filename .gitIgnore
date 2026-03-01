@@ -29,3 +29,5 @@
 /client/*.njsproj
 /client/*.sln
 /client/*.sw?
+
+/node_modules

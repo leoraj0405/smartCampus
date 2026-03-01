@@ -4,7 +4,7 @@ import crypto from 'crypto';
 import dotenv from 'dotenv';
 import * as jwt from 'jsonwebtoken';
 import { generateUniqueRandomString } from '../../utils/commonFunctions';
-import { IFetchStudents, IInsertStudent, IServiceResult } from '../../utils/utils';
+import { IFetchStudents, IInsertStudent, IServiceResult, IResObj } from '../../utils/utils';
 dotenv.config();
 
 const hashService = new HashService()
@@ -19,8 +19,8 @@ class Studentservices {
         searchBy = 'fullName',
         searchType = 'contains',
     }: IFetchStudents
-    ): Promise<IServiceResult<any>> {
-        const responseObj = {
+    ): Promise<IServiceResult<object>> {
+        const responseObj: IResObj = {
             data: [],
             pagination: {
                 totalPages: 0,
@@ -38,9 +38,9 @@ class Studentservices {
         const countQuery = `SELECT COUNT(*) as total FROM students WHERE managementId = ? AND deletedAt IS NULL`;
         try {
             let paginition = '';
-            let pattern;
+            let pattern: string;
             let searchCondition = '';
-            const searchValues: any[] = [];
+            const searchValues: Array<string | number | boolean | null> = [];
 
             if (searchType === 'startWith') pattern = `${searchTerm}%`;
             else if (searchType === 'endWith') pattern = `%${searchTerm}`;
@@ -57,15 +57,16 @@ class Studentservices {
                 }
                 paginition = ` LIMIT ? OFFSET ?`;
             }
-            const totalQuery: any = await execQuery(countQuery, [managementId])
+            const totalQuery = await execQuery(countQuery, [managementId]) as { total: number }[]
             const totalRecords = totalQuery[0]?.total || 0;
             responseObj.totalRecords = totalRecords;
             if (totalQuery[0].total === 0) {
                 return { statusCode: 404, data: responseObj, message: 'No records.' };
             }
             const finalFetchQuery = `${query}${searchCondition} LIMIT ? OFFSET ?`;
-            const response: any = await execQuery(finalFetchQuery, [managementId, ...searchValues, limitNumber, (pageNumber - 1) * limitNumber]);
-            if (response.length === 0) {
+            type DBStudent = IInsertStudent & { id: string; password?: string; slatWord?: string; fullName?: string; emailId?: string; profileImage?: string };
+            const response = await execQuery(finalFetchQuery, [managementId, ...searchValues, limitNumber, (pageNumber - 1) * limitNumber]) as DBStudent[];
+            if (!response || response.length === 0) {
                 return { statusCode: 404, data: responseObj, message: 'No records.' };
             }
             responseObj.pagination.pageSize = limitNumber;
@@ -173,7 +174,7 @@ class Studentservices {
     }
 
 
-    async updateStudentById(studentId: string, reqUpdateValue: any, profileImage?: string | null) {
+    async updateStudentById(studentId: string, reqUpdateValue: Record<string, string | number | boolean | null>, profileImage?: string | null) {
         try {
             if (profileImage) {
                 reqUpdateValue.profileImage = profileImage;
@@ -192,12 +193,13 @@ class Studentservices {
                 SET ${updateValueObj},
                 updatedAt = CURRENT_TIMESTAMP()
                 WHERE id = ?`;
-            const response: any = await execQuery(query, [
+            const resp = await execQuery(query, [
                 ...updateValueData,
                 studentId,
             ]);
 
-            if (response.affectedRows !== 0) {
+            const ura = resp as { affectedRows?: number };
+            if (ura.affectedRows && ura.affectedRows !== 0) {
                 return this.fetchStudentbyId(studentId)
             } else {
                 return { statusCode: 404, data: [], message: 'record not found' };
@@ -210,8 +212,9 @@ class Studentservices {
     async deleteStudentById(studentId: string) {
         const query = `UPDATE students SET deletedAt = NOW() WHERE id = ?`;
         try {
-            const deleteResponse: any = await execQuery(query, [studentId])
-            if (deleteResponse.affectedRows !== 0) {
+            const deleteResponse = await execQuery(query, [studentId])
+            const dr = deleteResponse as { affectedRows?: number };
+            if (dr.affectedRows && dr.affectedRows !== 0) {
                 return this.fetchStudentbyId(studentId)
             } else {
                 return { statusCode: 404, data: [], message: 'record not found' };
@@ -225,9 +228,32 @@ class Studentservices {
     async fetchStudentbyId(studentId: string) {
         const query = `SELECT * FROM students WHERE id = ?`;
         try {
-            const response: any = await execQuery(query, [studentId])
-            if (response.length !== 0) {
-                return { statusCode: 200, data: response[0], message: '' };
+            type DBStudent = IInsertStudent & { id: string; password?: string; slatWord?: string; fullName?: string; emailId?: string; profileImage?: string };
+            const response = await execQuery(query, [studentId]) as DBStudent[]
+            if (response && response.length !== 0) {
+                const r = response[0];
+                const record: IInsertStudent = {
+                    firstName: r.firstName,
+                    lastName: r.lastName,
+                    gender: r.gender,
+                    dob: r.dob,
+                    classId: r.classId,
+                    sectionId: r.sectionId,
+                    departmentId: r.departmentId,
+                    courseId: r.courseId,
+                    academicYear: r.academicYear,
+                    email: r.email || r.emailId || '',
+                    phoneNumber: r.phoneNumber,
+                    guardianName: r.guardianName,
+                    guardianPhone: r.guardianPhone,
+                    guardianEmail: r.guardianEmail,
+                    address: r.address,
+                    password: '',
+                    status: r.status,
+                    profileImage: r.profileImage,
+                    managementId: r.managementId
+                }
+                return { statusCode: 200, data: record, message: '' };
             } else {
                 return { statusCode: 404, data: [], message: 'Record not found' };
             }
@@ -239,14 +265,14 @@ class Studentservices {
     async loginStudentByEmail(email: string, password: string) {
         const query = `SELECT * FROM students WHERE email = ? AND deletedAt IS NULL`;
         try {
-            const response: any = await execQuery(query, [email]);
-            if (response.length === 0) {
+            type DBStudent = IInsertStudent & { id: string; password?: string; slatWord?: string; fullName?: string; emailId?: string; profileImage?: string };
+            const response = await execQuery(query, [email]) as DBStudent[];
+            if (!response || response.length === 0) {
                 return { statusCode: 401, message: 'Invalid Email.', token: '', userData: {}, data: null };
             }
-
             const isPasswordMatch = hashService.comparePassword(
-                password + response[0].slatWord,
-                response[0].password
+                password + (response[0].slatWord || ''),
+                response[0].password || ''
             );
             if (!isPasswordMatch) {
                 return { statusCode: 401, message: 'Invalid credentials.', token: '', userData: {}, data: null };
@@ -254,7 +280,7 @@ class Studentservices {
 
             const payload = {
                 studentId: response[0].id,
-                emailId: response[0].email,
+                emailId: response[0].email || response[0].emailId,
                 role: 'student',
             };
 
@@ -266,12 +292,12 @@ class Studentservices {
                     id: response[0].id,
                     firstName: response[0].firstName,
                     fullName: response[0].fullName,
-                    emailId: response[0].emailId,
+                    emailId: response[0].email || response[0].emailId,
                     profileImage: response[0].profileImage,
                 },
                 message: ''
             };
-        } catch (error: any) {
+        } catch (error) {
             return { statusCode: 500, message: error instanceof Error ? error.message : String(error), token: '', userData: {}, data: null };
         }
     }

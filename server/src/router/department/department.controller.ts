@@ -27,7 +27,7 @@ route.post('/', async (req, res) => {
 
 route.put('/:id', async (req, res) => {
     const departmentId = req.params.id
-    const response: IServiceResult<IDepartment> = await departmentService.updateDepartmentById(departmentId, req.body)
+    const response: IServiceResult<IDepartment | null> = await departmentService.updateDepartmentById(departmentId, req.body)
     if (response?.statusCode === 200) {
         res.status(200).json(response.data)
     } else {
@@ -47,7 +47,7 @@ route.delete('/:id', async (req, res) => {
 
 route.get('/:id', async (req, res) => {
     const departmentId = req.params.id
-    const response: IServiceResult<IDepartment> = await departmentService.fetchDepartmentById(departmentId)
+    const response: IServiceResult<IDepartment | null> = await departmentService.fetchDepartmentById(departmentId)
     if (response?.statusCode === 200) {
         res.status(200).json(response.data)
     } else {

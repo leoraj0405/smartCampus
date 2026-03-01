@@ -60,7 +60,7 @@ route.post('/', authenticateToken, async (req, res) => {
     }
 
     else if (staffDetails?.data && Object.keys(staffDetails.data).length > 0) {
-        createdByName = staffDetails?.data?.fullname
+        createdByName = (staffDetails?.data as any)?.fullName || ''
     } else {
         return res.status(401).json({
             statusCode: 401,
@@ -129,7 +129,7 @@ route.post('/', authenticateToken, async (req, res) => {
     } else {
         return res.status(response?.statusCode).json(response)
     }
-})
+});
 
 route.delete('/:id/:managementId', authenticateToken, async (req, res) => {
     const eventId = req.params.id
@@ -140,7 +140,7 @@ route.delete('/:id/:managementId', authenticateToken, async (req, res) => {
     } else {
         return res.status(response.statusCode).json(response);
     }
-})
+});
 
 route.get('/:id/:managementId', authenticateToken, async (req, res) => {
     const eventId = req.params.id
@@ -151,6 +151,18 @@ route.get('/:id/:managementId', authenticateToken, async (req, res) => {
     } else {
         return res.status(response.statusCode).json(response);
     }
+});
+
+route.put('/:eventId/:managementId', authenticateToken, async (req, res) => {
+    const managementId = req.params.managementId;
+    const eventId = req.params.eventId
+    const response = await eventSevices.updateEvents(eventId, managementId, req.body)
+    if (response?.statusCode === 200) {
+        res.status(200).json(response.data)
+    } else {
+        res.status(response?.statusCode || 500).json({ error: response?.message || response })
+    }
 })
+
 
 export default route;

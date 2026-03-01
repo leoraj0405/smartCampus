@@ -1,6 +1,6 @@
 import { EventType, TargetAudience } from "./enums";
 
-export function isValidEventType(value: any): value is EventType {
+export function isValidEventType(value: string | number): value is EventType {
     return Object.values(EventType)
         .filter(v => typeof v === "number")
         .includes(Number(value));

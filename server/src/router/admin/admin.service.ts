@@ -1,5 +1,5 @@
 import { execQuery } from '../../config/database/db.connection'
-import { IServiceResult, IAdmin } from '../../utils/utils';
+import { IServiceResult, IAdmin, IAdminCreate } from '../../utils/utils';
 import HashService from '../../utils/password.hash';
 import crypto from 'crypto';
 import dotenv from 'dotenv';
@@ -14,8 +14,8 @@ class AdminServices {
     async fetchAllAdminsByManagementId(managementId: string): Promise<IServiceResult<IAdmin[]>> {
         const query = `SELECT * FROM admin WHERE managementId = ? AND deletedAt IS NULL`;
         try {
-            const fetchAdminResult: any = await execQuery(query, [managementId])
-            if (fetchAdminResult.length !== 0) {
+            const fetchAdminResult = await execQuery(query, [managementId]) as IAdmin[]
+            if (fetchAdminResult && fetchAdminResult.length !== 0) {
                 return { statusCode: 200, data: fetchAdminResult, message: '' };
             } else {
                 return { statusCode: 404, data: [], message: 'Record not found' };
@@ -29,7 +29,7 @@ class AdminServices {
         }
     }
 
-    async createAdmin(body: any, profileImage: string | null): Promise<IServiceResult<null>> {
+    async createAdmin(body: IAdminCreate, profileImage: string | null): Promise<IServiceResult<null>> {
         const query = `
         INSERT INTO admin (
             id,
@@ -67,9 +67,9 @@ class AdminServices {
                 fullName,
                 emailId,
                 hashedPassword,
-                status,
-                profileImage,
-                phoneNumber,
+                status ?? null,
+                profileImage ?? null,
+                phoneNumber ?? null,
                 managementId,
                 randomWord
             ])
@@ -87,7 +87,7 @@ class AdminServices {
         }
     }
 
-    async updateAdminById(adminId: string, reqUpdateValue: any, profileImage?: string | null) {
+    async updateAdminById(adminId: string, reqUpdateValue: Record<string, string | number | boolean | null>, profileImage?: string | null): Promise<IServiceResult<IAdmin | null>> {
         try {
             if (profileImage) {
                 reqUpdateValue.profileImage = profileImage;
@@ -107,12 +107,13 @@ class AdminServices {
                 updatedAt = CURRENT_TIMESTAMP()
                 WHERE id = ?`;
 
-            const updateAdminResult: any = await execQuery(query, [
+            const updateAdminResult = await execQuery(query, [
                 ...updateValueData,
                 adminId,
             ]);
 
-            if (updateAdminResult.affectedRows !== 0) {
+            const ura = updateAdminResult as { affectedRows?: number };
+            if (ura.affectedRows && ura.affectedRows !== 0) {
                 return this.fetchAdminById(adminId);
             } else {
                 return { statusCode: 404, message: 'Admin record not found.', data: null };
@@ -126,8 +127,9 @@ class AdminServices {
     async deleteAdminById(adminId: string) {
         const query = `UPDATE admin SET deletedAt = NOW() WHERE id = ?`;
         try {
-            const deleteAdminResult: any = await execQuery(query, [adminId])
-            if (deleteAdminResult.affectedRows !== 0) {
+            const deleteAdminResult = await execQuery(query, [adminId])
+            const dr = deleteAdminResult as { affectedRows?: number };
+            if (dr.affectedRows && dr.affectedRows !== 0) {
                 return { statusCode: 200, message: 'Admin deleted successfully.', data: null };
             } else {
                 return { statusCode: 404, message: 'Record not found', data: null };
@@ -140,23 +142,24 @@ class AdminServices {
     async fetchAdminById(adminId: string) {
         const query = `SELECT * FROM admin WHERE id = ? AND deletedAt IS NULL`;
         try {
-            const fetchAdminResult: any = await execQuery(query, [adminId])
-            if (fetchAdminResult.length !== 0) {
+            const fetchAdminResult = await execQuery(query, [adminId]) as IAdmin[]
+            if (fetchAdminResult && fetchAdminResult.length !== 0) {
                 return { statusCode: 200, data: fetchAdminResult[0], message: '' };
             } else {
-                return { statusCode: 404, data: {}, message: 'Record not found' };
+                return { statusCode: 404, data: null, message: 'Record not found' };
             }
         } catch (error) {
-            return { statusCode: 500, data: {}, message: error instanceof Error ? error.message : String(error) };
+            return { statusCode: 500, data: null, message: error instanceof Error ? error.message : String(error) };
         }
     }
 
     async loginAdminByEmail(emailId: string, password: string) {
         const query = `SELECT * FROM admin WHERE emailId = ? AND deletedAt IS NULL`;
         try {
-            const fetchAdminResult: any = await execQuery(query, [emailId]);
+            type DBAdmin = IAdmin & { password: string; slatWord: string };
+            const fetchAdminResult = await execQuery(query, [emailId]) as DBAdmin[];
 
-            if (fetchAdminResult.length === 0) {
+            if (!fetchAdminResult || fetchAdminResult.length === 0) {
                 return { statusCode: 404, message: 'Record not found', token: '', userData: {}, data: null };
             }
 
@@ -188,9 +191,9 @@ class AdminServices {
                 },
                 message: ''
             };
-        } catch (error: any) {
+        } catch (error) {
             console.error(error);
-            return { statusCode: 500, message: error.message || error, token: '', userData: {}, data: null };
+            return { statusCode: 500, message: error instanceof Error ? error.message : String(error), token: '', userData: {}, data: null };
         }
     }
 
